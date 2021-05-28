@@ -1,0 +1,16 @@
+---
+- name: Set authorized SSH keys
+  template:
+    src: files/ssh/authorized_keys.j2
+    dest: "/home/{{ hostvars[inventory_hostname].user_name }}/.ssh/authorized_keys"
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+
+- name: Setup HDFS properties
+  template:
+    src: files/etc/hadoop/hdfs-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/hdfs-site.xml
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644

@@ -1,0 +1,7 @@
+# Ansible
+.vault-password-file
+.DS_Store
+
+# Terraform
+*.tfstate
+*.tfstate.backup

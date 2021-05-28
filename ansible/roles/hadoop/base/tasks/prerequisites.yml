@@ -1,0 +1,18 @@
+---
+- name: Add EPEL repo
+  become: yes
+  yum:
+    name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: present
+
+- name: Ensure all packages are up-to-date
+  become: yes
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install packages
+  become: yes
+  yum:
+    name: java-1.8.0-openjdk-headless
+    state: present

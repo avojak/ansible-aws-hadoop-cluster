@@ -1,0 +1,19 @@
+---
+- hosts: all
+  gather_facts: true
+  roles:
+    - hadoop/base
+
+- hosts: datanodes
+  vars_files:
+    - secrets.yml
+  gather_facts: true
+  roles:
+    - hadoop/datanode
+
+- hosts: namenode
+  vars_files:
+    - secrets.yml
+  gather_facts: true
+  roles:
+    - hadoop/namenode

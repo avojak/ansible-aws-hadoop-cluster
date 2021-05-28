@@ -1,0 +1,107 @@
+# ---
+# - name: Download Hadoop package
+#   get_url:
+#     url: https://apache.claz.org/hadoop/common/stable/hadoop-3.3.0.tar.gz
+#     dest: /tmp/hadoop-3.3.0.tar.gz
+
+# - name: Unpack Hadoop
+#   become: yes
+#   unarchive:
+#     src: /tmp/hadoop-3.3.0.tar.gz
+#     dest: /opt
+#     creates: /opt/hadoop-3.3.0
+#     copy: no
+#     owner: "{{ user_name }}"
+#     group: "{{ user_group }}"
+
+# - name: Create link to current Hadoop version
+#   become: yes
+#   file: path=/opt/hadoop src=/opt/hadoop-3.3.0 state=link owner={{ user_name }} group={{ user_group }}
+#   notify: restart services
+
+# - name: Setup Hadoop core-site
+#   template:
+#     src: core-site.xml.j2
+#     dest: /opt/hadoop/etc/hadoop/core-site.xml
+#     owner: "{{ user_name }}"
+#     group: "{{ user_group }}"
+#     mode: 0644
+#   notify: restart services
+
+# - name: Setup Hadoop config files
+#   copy: dest=/opt/hadoop/etc/hadoop/{{item}} src=files/{{item}} mode=0644 owner={{ user_name }} group={{ user_group }}
+#   with_items:
+#       - hadoop-env.sh
+#       - hdfs-site.xml
+#       - mapred-site.xml
+#       - yarn-site.xml
+#   notify: restart services
+
+# - name: Format namenode
+#   become: yes
+#   command: /opt/hadoop/bin/hdfs namenode -format
+#   args:
+#     creates: /opt/hadoop/dfs
+
+# - name: Download Spark
+#   get_url:
+#     url: https://apache.claz.org/spark/spark-3.1.1/spark-3.1.1-bin-without-hadoop.tgz
+#     dest: /tmp/spark-3.1.1.tar.gz
+
+# - name: Unpack Spark
+#   become: yes
+#   unarchive:
+#     src: /tmp/spark-3.1.1.tar.gz
+#     dest: /opt
+#     creates: /opt/spark-3.1.1
+#     copy: no
+#     owner: "{{ user_name }}"
+#     group: "{{ user_group }}"
+
+# - name: Create link to current Spark version
+#   become: yes
+#   file: path=/opt/spark src=/opt/spark-3.1.1-bin-without-hadoop state=link owner={{ user_name }} group={{ user_group }}
+
+# - name: Set HADOOP_CONF_DIR
+#   become: yes
+#   copy: dest=/etc/profile.d/hadoop-conf.sh content="export HADOOP_CONF_DIR=/opt/hadoop/etc/hadoop" mode=0644
+
+# - name: Fix file permissions
+#   become: yes
+#   file:
+#     path: /opt/hadoop-3.3.0
+#     state: directory
+#     recurse: yes
+#     owner: "{{ user_name }}"
+#     group: "{{ user_group }}"
+
+# - name: Update $PATH
+#   become: yes
+#   copy:
+#     dest: /etc/profile.d/custom-path.sh
+#     content: 'PATH=$PATH:/opt/hadoop/bin/'
+
+# - name: Setup service files
+#   become: yes
+#   copy: dest=/lib/systemd/system/{{item}} src=files/{{item}} mode=0644 owner={{ user_name }}up=root
+#   with_items:
+#       - hdfs-namenode.service
+#       - hdfs-datanode.service
+#       - yarn-resourcemanager.service
+#       - yarn-nodemanager.service
+#       - yarn-proxyserver.service
+#       - yarn-historyserver.service
+#   notify: reload systemd
+
+# - meta: flush_handlers
+
+# - name: Enable services
+#   become: yes
+#   service: name={{item}} state=started enabled=yes
+#   with_items:
+#       - hdfs-namenode
+#       - hdfs-datanode
+#       - yarn-resourcemanager
+#       - yarn-nodemanager
+#       - yarn-proxyserver
+#       - yarn-historyserver

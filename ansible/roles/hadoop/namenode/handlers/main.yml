@@ -1,0 +1,17 @@
+---
+- name: reload systemd
+  become: yes
+  command: systemctl daemon-reload
+
+- name: restart services
+  become: yes
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - hdfs-namenode
+    - hdfs-datanode
+    - yarn-resourcemanager
+    - yarn-nodemanager
+    - yarn-proxyserver
+    - yarn-historyserver

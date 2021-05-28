@@ -1,0 +1,6 @@
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://{{ hostvars[inventory_hostname]['groups']['namenode'][0] }}:9000</value>
+    </property>
+</configuration>

@@ -1,0 +1,7 @@
+[namenode]
+<nnode> user_name=ec2-user user_group=ec2-user
+
+[datanodes]
+<dnode01> user_name=ec2-user user_group=ec2-user
+<dnode02> user_name=ec2-user user_group=ec2-user
+<dnode03> user_name=ec2-user user_group=ec2-user

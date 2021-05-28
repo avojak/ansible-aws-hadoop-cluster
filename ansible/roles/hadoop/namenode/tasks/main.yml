@@ -1,0 +1,117 @@
+---
+- name: Set private key
+  template:
+    src: files/ssh/id_rsa.j2
+    dest: "/home/{{ hostvars[inventory_hostname].user_name }}/.ssh/id_rsa"
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0600
+
+- name: Set public key
+  template:
+    src: files/ssh/id_rsa.pub.j2
+    dest: "/home/{{ hostvars[inventory_hostname].user_name }}/.ssh/id_rsa.pub"
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+
+- name: Set SSH config
+  template:
+    src: files/ssh/config.j2
+    dest: "/home/{{ hostvars[inventory_hostname].user_name }}/.ssh/config"
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0600
+
+- name: Setup HDFS properties
+  template:
+    src: files/etc/hadoop/hdfs-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/hdfs-site.xml
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+  notify: restart services
+
+- name: Setup MapReduce properties
+  template:
+    src: files/etc/hadoop/mapred-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/mapred-site.xml
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+  notify: restart services
+
+- name: Setup YARN properties
+  template:
+    src: files/etc/hadoop/yarn-site.xml.j2
+    dest: /opt/hadoop/etc/hadoop/yarn-site.xml
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+
+- name: Setup masters config file
+  template:
+    src: files/etc/hadoop/masters.j2
+    dest: /opt/hadoop/etc/hadoop/masters
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+  notify: restart services
+  
+- name: Setup slaves config file
+  template:
+    src: files/etc/hadoop/slaves.j2
+    dest: /opt/hadoop/etc/hadoop/slaves
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+  notify: restart services
+
+- name: Fix file permissions
+  become: yes
+  file:
+    path: /opt/hadoop-3.3.0
+    state: directory
+    recurse: yes
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+  notify: restart services
+
+- name: Format namenode
+  become: yes
+  command: /opt/hadoop/bin/hdfs namenode -format
+  args:
+    creates: /opt/hadoop/dfs
+
+- name: Setup service files
+  become: yes
+  template: 
+    src: "files/systemd/{{ item }}.j2"
+    dest: "/lib/systemd/system/{{ item }}"
+    owner: "{{ hostvars[inventory_hostname].user_name }}"
+    group: "{{ hostvars[inventory_hostname].user_group }}"
+    mode: 0644
+  with_items:
+      - hdfs-namenode.service
+      - hdfs-datanode.service
+      - yarn-resourcemanager.service
+      - yarn-nodemanager.service
+      - yarn-proxyserver.service
+      - yarn-historyserver.service
+  notify: reload systemd
+
+# - meta: flush_handlers
+
+- name: Enable services
+  become: yes
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  with_items:
+      - hdfs-namenode
+      - hdfs-datanode
+      - yarn-resourcemanager
+      - yarn-nodemanager
+      - yarn-proxyserver
+      - yarn-historyserver

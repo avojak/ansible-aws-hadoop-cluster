@@ -1,0 +1,10 @@
+[Unit]
+Description=Hadoop Distributed File System
+
+[Service]
+Type=forking
+ExecStart=/opt/hadoop/bin/hdfs --daemon start namenode
+User={{ hostvars[inventory_hostname].user_name }}
+
+[Install]
+WantedBy=multi-user.target

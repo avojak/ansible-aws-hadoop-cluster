@@ -1,0 +1,19 @@
+Host nnode
+    HostName {{ hostvars[inventory_hostname]['groups']['namenode'][0] }}
+    User ec2-user
+    IdentityFile ~/.ssh/id_rsa
+
+Host dnode1
+    HostName {{ hostvars[inventory_hostname]['groups']['datanodes'][0] }}
+    User ec2-user
+    IdentityFile ~/.ssh/id_rsa
+
+Host dnode2
+    HostName {{ hostvars[inventory_hostname]['groups']['datanodes'][1] }}
+    User ec2-user
+    IdentityFile ~/.ssh/id_rsa
+
+Host dnode3
+    HostName {{ hostvars[inventory_hostname]['groups']['datanodes'][2] }}
+    User ec2-user
+    IdentityFile ~/.ssh/id_rsa
